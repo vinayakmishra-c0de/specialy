@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Surprise Countdown</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600&family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(-45deg, #0f172a, #1e1b4b, #311042, #111827);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            overflow-x: hidden;
+        }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .script-font {
+            font-family: 'Caveat', cursive;
+        }
+
+        /* Particle styling */
+        .particle {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.4);
+            border-radius: 50%;
+            pointer-events: none;
+            animation: floatUp 8s linear infinite;
+        }
+
+        @keyframes floatUp {
+            0% { transform: translateY(100vh) scale(0); opacity: 0; }
+            50% { opacity: 0.8; }
+            100% { transform: translateY(-10vh) scale(1); opacity: 0; }
+        }
+    </style>
+</head>
+<body class="relative min-h-screen flex flex-col justify-center items-center text-white p-4">
+
+    <div id="particles" class="absolute inset-0 overflow-hidden pointer-events-none z-0"></div>
+
+    <header class="absolute top-0 left-0 w-full p-4 flex justify-between items-start z-50 pointer-events-none">
+        <button id="secretBtn" class="pointer-events-auto cursor-pointer p-2 opacity-60 hover:opacity-100 transition duration-300 focus:outline-none" title="Developer Portal">
+            <svg class="w-10 h-10 fill-current text-purple-400" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M19,7C19,5.9 18.1,5 17,5C15.9,5 15,5.9 15,7C15,8.1 15.9,9 17,9C18.1,9 19,8.1 19,7M21,11C21,10.45 20.55,10 20,10H16.5C15.67,10 15,9.33 15,8.5V8.17C16.16,7.74 17,6.61 17,5.29C17,3.47 15.53,2 13.71,2C12.38,2 11.23,2.79 10.71,3.93L8.14,9.57C7.43,11.14 5.86,12.14 4.12,12.14H3V14H4.12C6.47,14 8.6,12.65 9.57,10.53L11,7.38V13.5C11,15.43 12.57,17 14.5,17H16V22H18V16C18,14.34 16.66,13 15,13H13V8.89L13.79,7.11C14.15,7.66 14.78,8 15.5,8H16.5C17.88,8 19,9.12 19,10.5V11H21M3,16H5V22H3V16Z" />
+            </svg>
+        </button>
+
+        <div id="relationshipTracker" class="pointer-events-auto bg-black/40 backdrop-blur-md border border-purple-500/30 p-3 rounded-2xl text-right max-w-xs sm:max-w-md shadow-lg shadow-purple-900/20">
+            <div class="text-[10px] uppercase tracking-widest text-purple-300 font-semibold mb-1">Our Timeline Together</div>
+            <div id="relClock" class="text-xs sm:text-sm font-mono text-pink-200 font-bold tracking-tight">
+                Loading moments...
+            </div>
+        </div>
+    </header>
+
+    <main class="w-full max-w-2xl text-center px-4 z-10 mt-16 md:mt-0">
+        
+        <div id="countdownScreen" class="block space-y-8">
+            <div class="space-y-2">
+                <h1 class="text-3xl md:text-5xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-pink-400 via-purple-400 to-indigo-300">
+                    The Final Countdown
+                </h1>
+                <p class="text-sm md:text-base text-slate-400 tracking-wide font-light">Waiting for the magic hour to unfold...</p>
+            </div>
+
+            <div class="grid grid-cols-4 gap-2 sm:gap-4 max-w-md mx-auto">
+                <div class="bg-slate-900/60 backdrop-blur-md border border-slate-800 p-3 sm:p-4 rounded-2xl shadow-xl">
+                    <span id="days" class="block text-2xl sm:text-4xl font-bold text-pink-400 font-mono">00</span>
+                    <span class="text-[10px] sm:text-xs uppercase tracking-wider text-slate-400 block mt-1">Days</span>
+                </div>
+                <div class="bg-slate-900/60 backdrop-blur-md border border-slate-800 p-3 sm:p-4 rounded-2xl shadow-xl">
+                    <span id="hours" class="block text-2xl sm:text-4xl font-bold text-purple-400 font-mono">00</span>
+                    <span class="text-[10px] sm:text-xs uppercase tracking-wider text-slate-400 block mt-1">Hours</span>
+                </div>
+                <div class="bg-slate-900/60 backdrop-blur-md border border-slate-800 p-3 sm:p-4 rounded-2xl shadow-xl">
+                    <span id="minutes" class="block text-2xl sm:text-4xl font-bold text-indigo-400 font-mono">00</span>
+                    <span class="text-[10px] sm:text-xs uppercase tracking-wider text-slate-400 block mt-1">Mins</span>
+                </div>
+                <div class="bg-slate-900/60 backdrop-blur-md border border-slate-800 p-3 sm:p-4 rounded-2xl shadow-xl">
+                    <span id="seconds" class="block text-2xl sm:text-4xl font-bold text-emerald-400 font-mono">00</span>
+                    <span class="text-[10px] sm:text-xs uppercase tracking-wider text-slate-400 block mt-1">Secs</span>
+                </div>
+            </div>
+        </div>
+
+        <div id="celebrationScreen" class="hidden scale-95 opacity-0 transition-all duration-1000 ease-out transform space-y-6">
+            <div class="animate-bounce inline-block bg-gradient-to-r from-pink-500 to-purple-500 text-xs font-bold px-4 py-1.5 rounded-full uppercase tracking-widest shadow-md shadow-pink-500/20">
+                Yay! It's Time 🎉
+            </div>
+            
+            <div class="bg-gradient-to-b from-purple-950/80 to-slate-930/90 backdrop-blur-xl border-2 border-pink-500/40 p-6 sm:p-10 rounded-3xl shadow-2xl shadow-pink-500/10 text-left relative max-w-xl mx-auto overflow-hidden">
+                <div class="absolute -top-10 -right-10 w-32 h-32 bg-pink-500/20 rounded-full blur-2xl"></div>
+                <div class="absolute -bottom-10 -left-10 w-32 h-32 bg-purple-500/20 rounded-full blur-2xl"></div>
+
+                <p id="finalNote" class="script-font text-2xl sm:text-3xl text-pink-100 leading-relaxed tracking-wide select-none text-center">
+                    my dear kangaroo, happy birthday once again or ab tum 18th ki ho gyi to tum legally voter id card, driving license jisse tum bullet chla skti ho.or pass port, pan card wagera v le skti ho. or tumhe political science ki student legally vote dene jayegi. bhagwan kre tum apne sare sapne ko pura kar sko, mujhe tumpe pura beleive hai. once again HAPPY BIRTHDAY! Your alien
+                </p>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        // CONFIGURABLE DATE METADATA TARGETS
+        // Indian Standard Time (IST) Targets calculated independently via UTC offsets (+05:30)
+        const BIRTHDAY_MONTH = 5; // 0-Indexed June = 5
+        const BIRTHDAY_DAY = 28;
+        const MET_YEAR = 2021;
+        const MET_MONTH = 9;     // 0-Indexed October = 9
+        const MET_DAY = 13;
+
+        // Base DOM Elements
+        const countdownScreen = document.getElementById('countdownScreen');
+        const celebrationScreen = document.getElementById('celebrationScreen');
+        const secretBtn = document.getElementById('secretBtn');
+
+        let devBypassActive = false;
+
+        // 1. DYNAMIC BACKGROUND FLOATING PARTICLE ENGINE
+        function createParticles() {
+            const container = document.getElementById('particles');
+            const particleCount = 40;
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.classList.add('particle');
+                particle.style.left = `${Math.random() * 100}vw`;
+                particle.style.width = `${Math.random() * 4 + 2}px`;
+                particle.style.height = particle.style.width;
+                particle.style.animationDelay = `${Math.random() * 8}s`;
+                particle.style.animationDuration = `${Math.random() * 6 + 6}s`;
+                container.appendChild(particle);
+            }
+        }
+        createParticles();
+
+        // 2. SECRET PORTAL AUTHENTICATION ENGINE
+        secretBtn.addEventListener('click', () => {
+            const password = prompt("Enter Developer Security Access Key:");
+            if (password === "Meowmeow") {
+                devBypassActive = true;
+                revealSurprise();
+            } else if (password !== null) {
+                alert("Access Denied: Incorrect Signature.");
+            }
+        });
+
+        // 3. SURPRISE STATE OVERRIDE DISPLAY ENGINE
+        function revealSurprise() {
+            countdownScreen.classList.add('hidden');
+            celebrationScreen.classList.remove('hidden');
+            // Allow layout repaint before triggering CSS transitional updates
+            setTimeout(() => {
+                celebrationScreen.classList.remove('scale-95', 'opacity-0');
+                celebrationScreen.classList.add('scale-100', 'opacity-100');
+            }, 50);
+        }
+
+        // 4. CHRONO METRIC COUNTDOWN LOGIC ENGINE
+        function updateClocks() {
+            // Get Current Universal System Time and map to exact IST instance offsets
+            const now = new Date();
+            
+            // Determine active tracking targets relative to target execution parameters
+            let currentYear = now.getUTCFullYear();
+            // Create target timestamp natively matching Indian Standard Time Offset limits
+            let targetBirthday = new Date(Date.UTC(currentYear, BIRTHDAY_MONTH, BIRTHDAY_DAY, 0, 0, 0) - (5.5 * 60 * 60 * 1000));
+            
+            // If targeted event deadline parameters have elapsed, keep current view state locked to finished parameters
+            if (now > targetBirthday && !devBypassActive) {
+                // If it is past June 28th within this calendar milestone instance context
+                if(now.getUTCMonth() === BIRTHDAY_MONTH && now.getUTCDate() >= BIRTHDAY_DAY || now.getUTCMonth() > BIRTHDAY_MONTH) {
+                    revealSurprise();
+                }
+            }
+
+            // Calculations for Countdown Clock (Clock 1)
+            const timeDifference = targetBirthday - now;
+
+            if (timeDifference <= 0) {
+                if (!devBypassActive) revealSurprise();
+                document.getElementById('days').innerText = "00";
+                document.getElementById('hours').innerText = "00";
+                document.getElementById('minutes').innerText = "00";
+                document.getElementById('seconds').innerText = "00";
+            } else {
+                const days = Math.floor(timeDifference / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((timeDifference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((timeDifference % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((timeDifference % (1000 * 60)) / 1000);
+
+                document.getElementById('days').innerText = String(days).padStart(2, '0');
+                document.getElementById('hours').innerText = String(hours).padStart(2, '0');
+                document.getElementById('minutes').innerText = String(minutes).padStart(2, '0');
+                document.getElementById('seconds').innerText = String(seconds).padStart(2, '0');
+            }
+
+            // Calculations for Continuous Relationship Tracker (Clock 2)
+            // Exact historical milestone reference point (October 13, 2021 IST) mapped via global standards
+            const anniversaryDate = new Date(Date.UTC(MET_YEAR, MET_MONTH, MET_DAY, 0, 0, 0) - (5.5 * 60 * 60 * 1000));
+            const relationshipDurationMs = now - anniversaryDate;
+
+            // Compute dynamic calendar matrix changes accurately across variable month lengths
+            let rYears = now.getFullYear() - anniversaryDate.getFullYear();
+            let rMonths = now.getMonth() - anniversaryDate.getMonth();
+            let rDays = now.getDate() - anniversaryDate.getDate();
+
+            if (rDays < 0) {
+                // Borrow trailing days matching prior month cycle parameters
+                const prevMonth = new Date(now.getFullYear(), now.getMonth(), 0);
+                rDays += prevMonth.getDate();
+                rMonths--;
+            }
+            if (rMonths < 0) {
+                rMonths += 12;
+                rYears--;
+            }
+
+            // Handle standard micro precision metrics smoothly inside real-time animation cycles
+            const rHours = String(now.getHours()).padStart(2, '0');
+            const rMins = String(now.getMinutes()).padStart(2, '0');
+            const rSecs = String(now.getSeconds()).padStart(2, '0');
+
+            document.getElementById('relClock').innerHTML = `
+                <span class="text-white">${rYears}Y</span> ${rMonths}M <span class="text-white">${rDays}D</span> ${rHours}h ${rMins}m ${rSecs}s
+            `;
+        }
+
+        // Initialize Execution Tick Loops Loops
+        setInterval(updateClocks, 1000);
+        updateClocks(); // Pre-execution immediate call initialization to eliminate visual block latency layouts
+    </script>
+</body>
+</html>
